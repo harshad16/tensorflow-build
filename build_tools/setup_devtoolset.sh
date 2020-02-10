@@ -12,8 +12,7 @@ export OS_VERSION="$OSVER$major"
 echo "OS_VERSION = "$OS_VERSION
 
 # todo find current Python version
-if [ "$DEV_TOOLSET_VERSION" = "7" ] ; then 
-	if [[ "$OS_VERSION" = "rhel6" ]] || [[ "$OS_VERSION" = "centos6" ]] ; then
+if [ "$DEV_TOOLSET_VERSION" = "7" ] ; then
 		echo "Found environment $OS_VERSION-$PYTHON_VERSION"  &&
 		export MANPATH=/opt/rh/devtoolset-7/root/usr/share/man:$MANPATH &&
 		export INFOPATH=/opt/rh/devtoolset-7/root/usr/share/info:$INFOPATH &&
@@ -28,10 +27,8 @@ if [ "$DEV_TOOLSET_VERSION" = "7" ] ; then
 		ln -s /opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin/gcc /usr/bin/gcc &&
 		ln -s /opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin/g++ /usr/bin/g++ &&
 		ln -s /opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin/ld /usr/bin/ld;
-	fi
 fi
-if [ "$DEV_TOOLSET_VERSION" = "8" ] ; then 
-	if [[ "$OS_VERSION" = "rhel6" ]] || [[ "$OS_VERSION" = "centos6" ]] ; then
+if [ "$DEV_TOOLSET_VERSION" = "8" ] ; then
 		echo "Found environment $OS_VERSION-$PYTHON_VERSION"  &&
 		export MANPATH=/opt/rh/devtoolset-8/root/usr/share/man:$MANPATH &&
 		export INFOPATH=/opt/rh/devtoolset-8/root/usr/share/info:$INFOPATH &&
@@ -46,13 +43,12 @@ if [ "$DEV_TOOLSET_VERSION" = "8" ] ; then
 		ln -s /opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin/gcc /usr/bin/gcc &&
 		ln -s /opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin/g++ /usr/bin/g++ &&
 		ln -s /opt/rh/devtoolset-$DEV_TOOLSET_VERSION/root/usr/bin/ld /usr/bin/ld;
-	fi
 fi
 
 echo "LD_LIBRARY_PATH ="$LD_LIBRARY_PATH;
 echo "MANPATH ="$MANPATH;
-echo "INFOPATH ="$INFOPATH; 
-echo "PCP_DIR ="$PCP_DIR; 
+echo "INFOPATH ="$INFOPATH;
+echo "PCP_DIR ="$PCP_DIR;
 echo "PYTHONPATH ="$PYTHONPATH;
 echo "PERL5LIB ="$PERL5LIB;
 echo "PATH ="$PATH;

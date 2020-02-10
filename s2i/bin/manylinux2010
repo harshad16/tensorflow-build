@@ -117,7 +117,6 @@ else
     source $BUILD_TOOLS_DIR/build_bazel.sh
 fi
 
-
 # Naming the directory according to the naming convention
 major=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f1)
 minor=$(cat /etc/centos-release | tr -dc '0-9.'|cut -d \. -f2)
@@ -144,7 +143,6 @@ done
 echo "FINAL_STR = "$FINAL_STR
 TENSORFLOW_BUILD_DIR_NAME=$OS_VERSION/${TF_GIT_BRANCH//r}/${FINAL_STR}
 
-
 #Dev Mode
 if [[ $TEST_LOOP = "y" ]]
 then
@@ -159,7 +157,6 @@ then
 	done
 fi
 
-
 ### git clone tf and test
 cd /workspace/tensorflow
 echo "####################################"
@@ -167,7 +164,7 @@ echo "      clone git repo.....       	  "
 echo "####################################"
 #git clone --branch=r1.13 --depth=1 https://github.com/tensorflow/tensorflow.git
 git clone --branch=$TF_GIT_BRANCH --depth=1 https://github.com/tensorflow/tensorflow.git tmp_repo
-mv tmp_repo/* .
+cp -r tmp_repo/. .
 rm -rf tmp_repo
 if [ -f $BUILD_TOOLS_DIR/manylinux-$TF_GIT_BRANCH.patch ]; then
   echo "Applying manylinux patch"
@@ -194,6 +191,11 @@ fi
 # echo "      test.....       	      "
 # echo "####################################"
 # bazel test -c opt -- //tensorflow/...
+
+if [ "$TF_GIT_BRANCH" == "r2.2" ]; then
+  # https://github.com/tensorflow/tensorflow/issues/40688
+  perl -pi.bak -e 's%, CompareUFunc%, (PyUFuncGenericFunction) CompareUFunc%g' tensorflow/python/lib/core/bfloat16.cc
+fi
 echo "####################################"
 echo "      configure.....       	      "
 echo "####################################"
@@ -209,7 +211,6 @@ rm -fr /workspace/bins/tensorflow*
 
 source $BUILD_TOOLS_DIR/print_build_info.sh || $MY_EXIT_1
 mv build_info.* /workspace/bins/
-
 
 # TODO refator this out to script
 env_check CUSTOM_BUILD
@@ -281,7 +282,6 @@ fi # end build
 if ls -l  /workspace/build.log; then
 	mv /workspace/build.log /workspace/bins/ ;
 fi
-
 
 ### enable HOST_ON_HTTP_SERVER only with deploymentConfig(i.e build-dc.json) and NOT with Jobs.
 if [[ $HOST_ON_HTTP_SERVER = "y" ]]

@@ -14,63 +14,41 @@ LABEL io.k8s.description="S2I builder for Tensorflow binaries." \
 ARG BAZEL_VERSION=0.26.1
 ARG DEV_TOOLSET_VERSION=7
 ARG PYTHON_VERSION=3.6
+
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/ci_build/install/install_pip_packages.sh
-ARG PIP_LIST="wheel==0.31.1 setuptools==39.1.0 six==1.12.0 absl-py protobuf==3.6.1 enum34 futures mock numpy pixiedust pillow pyaml keras_applications==1.0.8 keras_preprocessing==1.0.5 tf-estimator-nightly"
+ARG PIP_LIST="wheel==0.31.1 setuptools==39.1.0 six==1.12.0 absl-py protobuf==3.6.1 enum34 futures mock numpy<1.19.0 pixiedust pillow argparse pyaml keras_applications==1.0.8 keras_preprocessing==1.0.5 tf-estimator-nightly"
 
-ENV BAZEL_VERSION=$BAZEL_VERSION
-ENV DEV_TOOLSET_VERSION=$DEV_TOOLSET_VERSION
-ENV PIP_LIST=$PIP_LIST
-ENV PYTHON_VERSION=$PYTHON_VERSION
-
+ENV BAZEL_VERSION=$BAZEL_VERSION \
+	  DEV_TOOLSET_VERSION=$DEV_TOOLSET_VERSION \
+	  PIP_LIST=$PIP_LIST \
+	  PYTHON_VERSION=$PYTHON_VERSION
 
 # fix fatal: unable to look up current user in the passwd file: no such user
-ENV GIT_COMMITTER_NAME=sub-mod
-ENV GIT_COMMITTER_NAME=subin@apache.org
-
+ENV GIT_COMMITTER_NAME=sub-mod \
+	  GIT_COMMITTER_NAME=subin@apache.org
 
 # Not essential, but wise to set the lang
 # Note: Users with other languages should set this in their derivative image
-ENV LANGUAGE en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LC_ALL=""
-ENV PYTHONIOENCODING UTF-8
-ENV NB_USER=default
-ENV NB_UID=1001
-ENV PYTHON_BIN_PATH=/usr/bin/python
-ENV TINI_VERSION=v0.18.0
+ENV LANGUAGE=en_US.UTF-8 \
+	  LANG=en_US.UTF-8 \
+	  LC_ALL="" \
+    PYTHONIOENCODING=UTF-8 \
+	  NB_USER=default \
+	  NB_UID=1001 \
+	  PYTHON_BIN_PATH=/usr/bin/python \
+	  TINI_VERSION=v0.18.0
 
 ## Bazel
-ENV PYTHON_LIB_PATH=/usr/lib64/python$PYTHON_VERSION/site-packages
-ENV LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-ENV BAZELRC=/root/.bazelrc
+ENV PYTHON_LIB_PATH="/usr/lib64/python$PYTHON_VERSION/site-packages" \
+	  LD_LIBRARY_PATH="/usr/local/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}" \
+	  BAZELRC="/root/.bazelrc"
 
 ################################################
 ## Tensorflow ./configure options for Bazel
 ################################################
-ENV PYTHON_BIN_PATH=/usr/bin/python
-ENV CC_OPT_FLAGS -march=native
-ENV TF_NEED_JEMALLOC 0
-ENV TF_NEED_GCP 0
-ENV TF_NEED_VERBS 0
-ENV TF_NEED_HDFS 0
-ENV TF_ENABLE_XLA 0
-ENV TF_NEED_OPENCL 0
-ENV TF_NEED_CUDA 1
-ENV TF_NEED_MPI 0
-ENV TF_NEED_GDR 0
-ENV TF_NEED_S3 0
-ENV TF_NEED_KAFKA 0
-ENV TF_NEED_IGNITE 0
-ENV TF_NEED_ROCM 0
-ENV TF_NEED_OPENCL_SYCL 0
-ENV TF_DOWNLOAD_CLANG 0
-ENV TF_SET_ANDROID_WORKSPACE 0
-ENV PATH /usr/local/bin:$PATH:/home/default/.local/bin
-# ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk.x86_64/
-ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk-1.8.0*
-
-
-## TODO : (check again)sourcestrategy can't be used for bazel because git clone doesnt work here
+ENV PYTHON_BIN_PATH=/usr/bin/python \
+  	PATH="/usr/local/bin:$PATH:/home/default/.local/bin" \
+  	JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-1.8.0*"
 
 RUN yum install -y centos-release-scl \
     && yum install -y vim gcc gcc-c++ clang glibc-devel c-ares c-ares-devel make openssl-devel automake autoconf gpg devtoolset-$DEV_TOOLSET_VERSION \
@@ -81,7 +59,7 @@ RUN yum install -y centos-release-scl \
     && yum install -y libxml2 libxml2-devel libxslt libxslt-devel \
     && yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel patch gdb file pciutils cmake \
     && yum install -y tar tree git curl wget java-headless bzip2 gnupg2 sqlite protobuf-compiler \
-	&& mkdir -p /opt/app-root && cd /opt/app-root/ && curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+	  && mkdir -p /opt/app-root && cd /opt/app-root/ && curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
 
 RUN wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini -P /tmp \
     && wget https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini.asc -P /tmp \
@@ -110,28 +88,13 @@ RUN chown -R 1001:1001 /opt/app-root  \
     && chmod -R ug+rwx /opt/app-root \
     && cd /opt/app-root/ \
     && chmod a+rw /etc/passwd \
-	&& wget -q https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-dist.zip \
-    && chmod a+x bazel*.zip \
-	&& unzip bazel*.zip \
-    && if [ "$BAZEL_VERSION" = "0.24.1" ] ; then mkdir -p /opt/app-root/output/ && cd /opt/app-root/output/ ; fi \
-    && if [ "$BAZEL_VERSION" = "0.24.1" ] ; then wget -q https://github.com/sub-mod/bazel-builds/releases/download/0.24.1/bazel-0.24.1 && mv bazel-0.24.1 bazel && chmod a+x bazel; fi
+    && mkdir -p /opt/app-root/output/ && cd /opt/app-root/output/ \
+    && wget -q https://github.com/sub-mod/bazel-builds/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION && mv bazel-$BAZEL_VERSION bazel && chmod a+x bazel
 
-# SHELL [ "/usr/bin/scl", "enable", "devtoolset-7" ]
-# RUN gcc -v
-# SHELL [ "/usr/bin/scl", "enable", "rh-python36" ]
-# RUN python -V
-
-# don't use container-entrypoint before running user application
-# use /entrypoint
 COPY ./s2i/bin/ /usr/libexec/s2i
 ADD entrypoint /entrypoint
 RUN chmod +x /entrypoint
 ADD build_tools /build_tools
-
-# need to remove /usr/bin/gcc
-# only possible to do that here and not in run script
-# RUN source /build_tools/setup_devtoolset.sh \
-#     && source /build_tools/setup_python.sh
 
 # Install pip and dependencies for tensorflow build.
 # if [ "$PYTHON_VERSION" = "3.6" ] ; then source scl_source enable rh-python36 ; fi \
@@ -157,22 +120,8 @@ RUN source /build_tools/setup_devtoolset.sh \
     && chown -R $NB_UID:root /home/$NB_USER \
     && chmod g+rwX,o+rX -R /home/$NB_USER
 
-# Build NCCL from source
-RUN cd /opt/app-root/ \
-  && git clone https://github.com/NVIDIA/nccl.git \
-  && cd nccl \
-  && make CUDA_HOME=/usr/local/cuda \
-  && make install
+# Build NCCL
 
-# NO CLEANUP
-# Donot add below commands
-#    && yum erase -y gcc gcc-c++ glibc-devel \
-#    && yum clean all -y \
-
-# export PATH=/opt/rh/devtoolset-7/root/usr/bin:${PATH}
-# look at difference between env output
-# need to setup Python separately
-# delete gcc/g++/python in running container for bazel to work.
 
 EXPOSE 8080
 

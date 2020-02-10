@@ -14,21 +14,17 @@ OS_VERSION="$OSVER$major"
 echo "OS_VERSION = "$OS_VERSION
 
 
-if [ "$PYTHON_VERSION" = "3.6" ] ; then 
-	if [[ "$OS_VERSION" = "rhel6" ]] || [[ "$OS_VERSION" = "centos6" ]] ; then
+if [ "$PYTHON_VERSION" = "3.6" ] ; then
 		echo "Found environment $OS_VERSION-$PYTHON_VERSION"  &&
 		rm -fr /usr/bin/pip &&
 		ln -s /opt/rh/rh-python36/root/usr/bin/pip /usr/bin/pip &&
 		pip -V;
-	fi
 fi
-if [ "$PYTHON_VERSION" = "2.7" ] ; then 
-	if [[ "$OS_VERSION" = "rhel6" ]] || [[ "$OS_VERSION" = "centos6" ]] ; then
+if [ "$PYTHON_VERSION" = "2.7" ] ; then
 		echo "Found environment $OS_VERSION-$PYTHON_VERSION"  &&
 		rm -fr /usr/bin/pip &&
 		ln -s /opt/rh/python27/root/usr/bin/pip /usr/bin/pip &&
 		pip -V;
-	fi
 fi
 
 echo "==============================="
